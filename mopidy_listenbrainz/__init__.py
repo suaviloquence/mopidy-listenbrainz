@@ -1,16 +1,15 @@
 import pathlib
 
 import pkg_resources
-
 from mopidy import config, ext
 
-__version__ = pkg_resources.get_distribution("Mopidy-Scrobbler").version
+__version__ = pkg_resources.get_distribution("Mopidy-Listenbrainz").version
 
 
 class Extension(ext.Extension):
 
-    dist_name = "Mopidy-Scrobbler"
-    ext_name = "scrobbler"
+    dist_name = "Mopidy-Listenbrainz"
+    ext_name = "listenbrainz"
     version = __version__
 
     def get_default_config(self):
@@ -18,11 +17,11 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super().get_config_schema()
-        schema["username"] = config.String()
-        schema["password"] = config.Secret()
+        schema["token"] = config.Secret()
+        schema["url"] = config.String()
         return schema
 
     def setup(self, registry):
-        from .frontend import ScrobblerFrontend
+        from .frontend import ListenbrainzFrontend
 
-        registry.add("frontend", ScrobblerFrontend)
+        registry.add("frontend", ListenbrainzFrontend)

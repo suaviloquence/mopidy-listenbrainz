@@ -1,7 +1,7 @@
 from unittest import mock
 
-from mopidy_scrobbler import Extension
-from mopidy_scrobbler import frontend as frontend_lib
+from mopidy_listenbrainz import Extension
+from mopidy_listenbrainz import frontend as frontend_lib
 
 
 def test_get_default_config():
@@ -9,10 +9,10 @@ def test_get_default_config():
 
     config = ext.get_default_config()
 
-    assert "[scrobbler]" in config
+    assert "[listenbrainz]" in config
     assert "enabled = true" in config
-    assert "username =" in config
-    assert "password =" in config
+    assert "token =" in config
+    assert "url =" in config
 
 
 def test_get_config_schema():
@@ -20,8 +20,8 @@ def test_get_config_schema():
 
     schema = ext.get_config_schema()
 
-    assert "username" in schema
-    assert "password" in schema
+    assert "token" in schema
+    assert "url" in schema
 
 
 def test_setup():
@@ -31,5 +31,5 @@ def test_setup():
     ext.setup(registry)
 
     registry.add.assert_called_once_with(
-        "frontend", frontend_lib.ScrobblerFrontend
+        "frontend", frontend_lib.ListenbrainzFrontend
     )

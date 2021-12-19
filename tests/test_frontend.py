@@ -1,23 +1,23 @@
 from unittest import mock
 
-import pylast
 import pytest
 
 from mopidy import models
-from mopidy_scrobbler import frontend as frontend_lib
+from mopidy_listenbrainz import frontend as frontend_lib
+from mopidy_listenbrainz.listenbrainz import Listenbrainz
 
 
 @pytest.fixture
 def pylast_mock():
-    with mock.patch("mopidy_scrobbler.frontend.pylast", spec=pylast) as m:
+    with mock.patch("mopidy_listenbrainz.frontend.listenbrainz", spec=Listenbrainz) as m:
         yield m
 
 
 @pytest.fixture
 def frontend():
-    config = {"scrobbler": {"username": "alice", "password": "secret"}}
+    config = {"listenbrainz": {"token": "xsjk", }}
     core = mock.sentinel.core
-    return frontend_lib.ScrobblerFrontend(config, core)
+    return frontend_lib.ListenbrainzFrontend(config, core)
 
 
 def test_on_start_creates_lastfm_network(pylast_mock, frontend):

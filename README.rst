@@ -1,6 +1,6 @@
-****************
+*******************
 Mopidy-Listenbrainz
-****************
+*******************
 
 .. image:: https://img.shields.io/pypi/v/Mopidy-Listenbrainz
     :target: https://pypi.org/project/Mopidy-Listenbrainz/
@@ -34,7 +34,7 @@ Configuration
 =============
 
 The extension is enabled by default when it is installed. You just need to add
-your `Listenbrainz user token <https://listenbrainz.org/profile/>` to your Mopidy configuration file::
+your `Listenbrainz user token <https://listenbrainz.org/profile/>`_ to your Mopidy configuration file::
 
     [listenbrainz]
     token = 240420-249429-29449
@@ -43,7 +43,7 @@ The following configuration values are available:
 
 - ``listenbrainz/enabled``: If the extension should be enabled or not.
   Defaults to enabled.
-- ``listenbrainz/token``: Your `Listenbrainz user token <https://listenbrainz.org/profile/>`
+- ``listenbrainz/token``: Your `Listenbrainz user token <https://listenbrainz.org/profile/>`_
 - ``listenbrainz/url``: The URL of the API of the Listenbrainz instance to record listens to (default: api.listenbrainz.org)
 
 
@@ -58,6 +58,6 @@ Project resources
 Credits
 =======
 
-- Fork of `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>` by `Stein Magnus Jodal <https://github.com/jodal>`__
+- Fork of `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`__ by `Stein Magnus Jodal <https://github.com/jodal>`__
 - Current maintainer: `suaviloquence <https://github.com/suaviloquence>`__
 - `Contributors <https://github.com/suaviloquence/mopidy-listenbrainz/graphs/contributors>`_

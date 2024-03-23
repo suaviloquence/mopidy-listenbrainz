@@ -84,5 +84,6 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
             return None  #  Playlists are expected to be saved
             #  once, by the frontend
 
-        found[0] = playlist
-        return found[0]
+        pos = self.playlists.index(found[0])
+        self.playlists[pos] = playlist
+        return self.playlists[pos]

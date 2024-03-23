@@ -40,7 +40,7 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
 
     def create(self, name: str) -> Playlist | None:
         uri = f"{self.uri_prefix}:{uuid4()}"
-        playlist = Playlist(uri=uri)
+        playlist = Playlist(uri=uri, name=name)
         self.playlists.append(playlist)
         return playlist
 

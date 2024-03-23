@@ -91,7 +91,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             else:
                 import_count += 1
                 logger.debug(
-                    f"Playlist {playlist.uri!r} imported from {source!r}"
+                    f"Tracks saved for playlist {playlist.uri!r}: {len(playlist.tracks)!r}"
                 )
 
         logger.info(

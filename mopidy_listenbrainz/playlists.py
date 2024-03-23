@@ -1,11 +1,15 @@
 import datetime
 import logging
-from typing import cast, List
+from typing import cast, List, NewType
 from uuid import uuid4
 
 from mopidy.backend import Backend, PlaylistsProvider
 from mopidy.models import Playlist, Ref
-from mopidy.types import Uri, UriScheme
+try:
+    from mopidy.types import Uri, UriScheme
+except ModuleNotFoundError:
+    Uri = NewType("Uri", str)
+    UriScheme = NewType("UriScheme", str)
 
 
 logger = logging.getLogger(__name__)

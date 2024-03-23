@@ -76,6 +76,8 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                 logger.warning(f"Failed to create playlist for {source!r}")
                 continue
 
+            logger.debug(f"Playlist {playlist.uri!r} created from {source!r}")
+
             complete_playlist = Playlist(
                 uri=playlist.uri,
                 name=playlist_name,

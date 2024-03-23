@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, NewType
 
 import pykka
 
 from mopidy import backend
-from mopidy.types import UriScheme
+try:
+    from mopidy.types import UriScheme
+except ModuleNotFoundError:
+    UriScheme = NewType("UriScheme", str)
 
 from . import playlists
 

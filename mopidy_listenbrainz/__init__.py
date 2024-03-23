@@ -19,9 +19,14 @@ class Extension(ext.Extension):
         schema = super().get_config_schema()
         schema["token"] = config.Secret()
         schema["url"] = config.String()
+        schema["import_playlists"] = config.Boolean()
         return schema
 
     def setup(self, registry):
         from .frontend import ListenbrainzFrontend
 
         registry.add("frontend", ListenbrainzFrontend)
+
+        from .backend import ListenbrainzBackend
+
+        registry.add("backend", ListenbrainzBackend)

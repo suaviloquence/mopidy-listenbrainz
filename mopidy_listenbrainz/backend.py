@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, NewType
 import pykka
 
 from mopidy import backend
+
 try:
     from mopidy.types import UriScheme
 except ModuleNotFoundError:

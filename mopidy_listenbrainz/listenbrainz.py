@@ -1,6 +1,7 @@
 import datetime
 import logging
 import time
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -21,6 +22,14 @@ VALIDATE_TOKEN_ENDPOINT = "/1/validate-token"
 
 # Musicbrainz resources
 MUSICBRAINZ_PLAYLIST_EXTENSION_URL = "https://musicbrainz.org/doc/jspf#playlist"
+
+
+@dataclass
+class PlaylistData:
+    playlist_id: str
+    name: str
+    track_mbids: List[str]
+    last_modified: int
 
 
 def playlist_identifier_to_id(playlist_identifier: str) -> Optional[str]:
@@ -133,7 +142,7 @@ class Listenbrainz(object):
             },
         )
 
-    def list_playlists_created_for_user(self) -> List[Dict[str, Any]]:
+    def list_playlists_created_for_user(self) -> List[PlaylistData]:
         if self.user_name is None:
             logger.warning("No playlist created for unknown user!")
             return []
@@ -146,7 +155,7 @@ class Listenbrainz(object):
             },
         )
         parsed_response = response.json()
-        playlists: List[Dict[str, Any]] = []
+        playlists: List[PlaylistData] = []
         found_playlists: List[str] = []
         for dto in parsed_response.get("playlists", []):
             playlist_dto = dto.get("playlist", {})
@@ -175,7 +184,7 @@ class Listenbrainz(object):
 
     def _collect_playlist_data(
         self, playlist_identifier: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[PlaylistData]:
         """Collect playlist data from a ListenBrainz playlist identifier.
 
         The ListenBrainz playlist identifier is a URL whose last path
@@ -234,9 +243,6 @@ class Listenbrainz(object):
             )
             return None
 
-        return {
-            "playlist_id": playlist_id,
-            "name": name,
-            "track_mbids": track_mbids,
-            "last_modified": int(creation_date.timestamp()),
-        }
+        return PlaylistData(
+            playlist_id, name, track_mbids, int(creation_date.timestamp())
+        )

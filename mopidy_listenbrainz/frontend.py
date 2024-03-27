@@ -1,5 +1,7 @@
 import logging
 import time
+from datetime import datetime, timedelta
+from threading import Timer
 
 import pykka
 from mopidy.core import CoreListener
@@ -18,6 +20,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self.config = config
         self.library = core.library
         self.playlists = core.playlists
+        self.playlists_update_timer = None
 
     def on_start(self):
         self.lb = Listenbrainz(
@@ -30,6 +33,10 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         if self.config["listenbrainz"].get("import_playlists", False):
             self.import_playlists()
 
+    def on_stop(self):
+        if self.playlists_update_timer:
+            self.playlists_update_timer.cancel()
+
     def import_playlists(self) -> None:
         logger.info("Import of ListenBrainz playlists")
 
@@ -37,10 +44,19 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         playlist_datas = self.lb.list_playlists_created_for_user()
         logger.debug(f"Found {len(playlist_datas)} playlists to import")
 
+        existing_playlists = self.playlists.as_list().get()
+        filtered_existing_playlists = dict(
+            [
+                (ref.uri, ref)
+                for ref in existing_playlists
+                if ref.uri.startswith("listenbrainz")
+            ]
+        )
+
         for playlist_data in playlist_datas:
-            source = playlist_data.get("playlist_id", "")
+            source = playlist_data.playlist_id
             tracks = []
-            for track_mbid in playlist_data.get("track_mbids", []):
+            for track_mbid in playlist_data.track_mbids:
                 query = self.library.search(
                     {"musicbrainz_trackid": [track_mbid]}, uris=["local:"]
                 )
@@ -67,22 +83,30 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                 )
                 continue
 
-            playlist_name = playlist_data.get("name", "")
-            query = self.playlists.create(
-                playlist_name, uri_scheme="listenbrainz"
-            )
-            playlist = query.get()
-            if playlist is None:
-                logger.warning(f"Failed to create playlist for {source!r}")
-                continue
+            playlist_uri = f"listenbrainz:playlist:{playlist_data.playlist_id}"
+            if playlist_uri in filtered_existing_playlists:
+                logger.debug(f"Will update playlist {playlist_uri}")
+                playlist = filtered_existing_playlists.pop(playlist_uri)
+            else:
+                query = self.playlists.create(
+                    playlist_uri, uri_scheme="listenbrainz"
+                )
+                # Hack, hack: The backend uses first parameter as URI,
+                # not name...
+                playlist = query.get()
+                if playlist is None:
+                    logger.warning(f"Failed to create playlist for {source!r}")
+                    continue
 
-            logger.debug(f"Playlist {playlist.uri!r} created from {source!r}")
+                logger.debug(
+                    f"Playlist {playlist.uri!r} created from {source!r}"
+                )
 
             complete_playlist = Playlist(
                 uri=playlist.uri,
-                name=playlist_name,
+                name=playlist_data.name,
                 tracks=tracks,
-                last_modified=playlist_data.get("last_modified"),
+                last_modified=playlist_data.last_modified,
             )
             query = self.playlists.save(complete_playlist)
             playlist = query.get()
@@ -94,9 +118,28 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                     f"Tracks saved for playlist {playlist.uri!r}: {len(playlist.tracks)!r}"
                 )
 
+        for playlist in filtered_existing_playlists.values():
+            self.playlists.delete(playlist.uri)
+
         logger.info(
             f"Successfull import of ListenBrainz playlists: {import_count}"
         )
+        self._schedule_playlists_import()
+
+    def _schedule_playlists_import(self):
+        if self.config["listenbrainz"].get("periodic_playlists_update", True):
+            now = datetime.now()
+            days_until_next_monday = 7 - now.weekday()
+            timer_interval = (
+                timedelta(days=days_until_next_monday).total_seconds()
+            )
+            logger.debug(
+                f"Playlist update scheduled in {timer_interval} seconds"
+            )
+            self.playlists_update_timer = Timer(
+                timer_interval, self.import_playlists
+            )
+            self.playlists_update_timer.start()
 
     def track_playback_started(self, tl_track):
         track = tl_track.track

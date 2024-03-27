@@ -46,6 +46,7 @@ The following configuration values are available:
 - ``listenbrainz/token``: Your `Listenbrainz user token <https://listenbrainz.org/profile/>`_
 - ``listenbrainz/url``: The URL of the API of the Listenbrainz instance to record listens to (default: api.listenbrainz.org)
 - ``listenbrainz/import_playlists``: Whether to import Listenbrainz playlists (default: ``false``)
+- ``listenbrainz/periodic_playlists_update``: Enable periodic import of Listenbrainz playlists (default: ``true``)
 
 Project resources
 =================

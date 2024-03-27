@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from mopidy.backend import Backend, PlaylistsProvider
 from mopidy.models import Playlist, Ref
+
 try:
     from mopidy.types import Uri, UriScheme
 except ModuleNotFoundError:
@@ -39,13 +40,25 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
         return [Ref.playlist(uri=p.uri, name=p.name) for p in self.playlists]
 
     def create(self, name: str) -> Playlist | None:
-        uri = f"{self.uri_prefix}:{uuid4()}"
+        uri = name
+        if not uri.startswith(self.uri_prefix):
+            return None
+
         playlist = Playlist(uri=uri, name=name)
         self.playlists.append(playlist)
         return playlist
 
     def delete(self, uri: Uri) -> bool:
-        return False
+        if not uri.startswith(self.uri_prefix):
+            return False
+
+        found = [p for p in self.playlists if p.uri == uri]
+        if len(found) == 0:
+            return False
+
+        pos = self.playlists.index(found[0])
+        del self.playlists[pos]
+        return True
 
     def get_items(self, uri: Uri) -> List[Ref] | None:
         if not uri.startswith(self.uri_prefix):
@@ -79,10 +92,6 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
         found = [p for p in self.playlists if p.uri == uri]
         if len(found) == 0:
             return None
-
-        if len(found[0].tracks) > 0:
-            return None  #  Playlists are expected to be saved
-            #  once, by the frontend
 
         pos = self.playlists.index(found[0])
         self.playlists[pos] = playlist

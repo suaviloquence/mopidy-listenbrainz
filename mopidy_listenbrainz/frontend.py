@@ -2,12 +2,13 @@ import logging
 import time
 from datetime import datetime, timedelta
 from threading import Timer
+from typing import List, Optional
 
 import pykka
 from mopidy.core import CoreListener
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Track
 
-from .listenbrainz import Listenbrainz
+from .listenbrainz import Listenbrainz, PlaylistData
 
 logger = logging.getLogger(__name__)
 
@@ -45,51 +46,38 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug(f"Found {len(playlist_datas)} playlists to import")
 
         existing_playlists = self.playlists.as_list().get()
+        recommendation_playlist_uri_prefix = (
+            "listenbrainz:playlist:recommendation"
+        )
         filtered_existing_playlists = dict(
             [
                 (ref.uri, ref)
                 for ref in existing_playlists
-                if ref.uri.startswith("listenbrainz")
+                if ref.uri.startswith(recommendation_playlist_uri_prefix)
             ]
         )
 
         for playlist_data in playlist_datas:
             source = playlist_data.playlist_id
-            tracks = []
-            for track_mbid in playlist_data.track_mbids:
-                query = self.library.search(
-                    {"musicbrainz_trackid": [track_mbid]}, uris=["local:"]
-                )
-                # search only in local database since other backends
-                # can be quite long to answer
-                results = query.get()
-
-                found_tracks = [t for r in results for t in r.tracks]
-                if len(found_tracks) == 0:
-                    logger.debug(
-                        f"Library has no track with MBID {track_mbid!r}"
-                    )
-                    continue
-                elif len(found_tracks) > 1:
-                    logger.debug(
-                        f"Library has multiple tracks with MBID {track_mbid!r}"
-                    )
-
-                tracks.append(found_tracks[0])
+            playlist_uri = f"{recommendation_playlist_uri_prefix}:{playlist_data.playlist_id}"
+            tracks = self._collect_playlist_tracks(playlist_data)
 
             if len(tracks) == 0:
-                logger.warning(
-                    f"Skipping import of playlist with no tracks for {source!r}"
+                logger.debug(
+                    f"Skipping import of playlist with no known track for {source!r}"
                 )
                 continue
 
-            playlist_uri = f"listenbrainz:playlist:{playlist_data.playlist_id}"
             if playlist_uri in filtered_existing_playlists:
-                logger.debug(f"Will update playlist {playlist_uri}")
-                playlist = filtered_existing_playlists.pop(playlist_uri)
+                filtered_existing_playlists.pop(playlist_uri)
+                # must pop since filtered_existing_playlists will
+                # finally be deleted
+
+                logger.debug(f"Already known playlist {playlist_uri}")
+                # maybe there're new tracks in Mopidy's database...
             else:
                 query = self.playlists.create(
-                    playlist_uri, uri_scheme="listenbrainz"
+                    name=playlist_uri, uri_scheme="listenbrainz"
                 )
                 # Hack, hack: The backend uses first parameter as URI,
                 # not name...
@@ -98,12 +86,10 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                     logger.warning(f"Failed to create playlist for {source!r}")
                     continue
 
-                logger.debug(
-                    f"Playlist {playlist.uri!r} created from {source!r}"
-                )
+                logger.debug(f"Playlist {playlist.uri!r} created")
 
             complete_playlist = Playlist(
-                uri=playlist.uri,
+                uri=playlist_uri,
                 name=playlist_data.name,
                 tracks=tracks,
                 last_modified=playlist_data.last_modified,
@@ -115,10 +101,11 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             else:
                 import_count += 1
                 logger.debug(
-                    f"Tracks saved for playlist {playlist.uri!r}: {len(playlist.tracks)!r}"
+                    f"Playlist saved with {len(playlist.tracks)} tracks {playlist.uri!r}"
                 )
 
         for playlist in filtered_existing_playlists.values():
+            logger.debug(f"Deletion of obsolete playlist {playlist.uri!r}")
             self.playlists.delete(playlist.uri)
 
         logger.info(
@@ -126,13 +113,33 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         )
         self._schedule_playlists_import()
 
+    def _collect_playlist_tracks(
+        self, playlist_data: PlaylistData
+    ) -> List[Track]:
+        tracks: List[Track] = []
+        for track_mbid in playlist_data.track_mbids:
+            query = self.library.search(
+                {"musicbrainz_trackid": [track_mbid]}, uris=["local:"]
+            )
+            # search only in local database since other backends can
+            # be quite long to answer, should we offer choice through
+            # config?
+            results = query.get()
+
+            found_tracks = [t for r in results for t in r.tracks]
+            if len(found_tracks) == 0:
+                continue
+
+            tracks.append(found_tracks[0])
+        return tracks
+
     def _schedule_playlists_import(self):
         if self.config["listenbrainz"].get("periodic_playlists_update", True):
             now = datetime.now()
             days_until_next_monday = 7 - now.weekday()
-            timer_interval = (
-                timedelta(days=days_until_next_monday).total_seconds()
-            )
+            timer_interval = timedelta(
+                days=days_until_next_monday
+            ).total_seconds()
             logger.debug(
                 f"Playlist update scheduled in {timer_interval} seconds"
             )

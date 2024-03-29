@@ -93,6 +93,14 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
         if len(found) == 0:
             return None
 
+        if uri.startswith(self.uri_prefix + ":recommendation"):
+            if not (len(playlist.tracks) > len(found[0].tracks)):
+                # return unchanged playlist for recommendations whose
+                # track list isn't increasing, really save iff first
+                # save after creation or new tracks being available in
+                # Mopidy's database
+                return found[0]
+
         pos = self.playlists.index(found[0])
         self.playlists[pos] = playlist
         return self.playlists[pos]

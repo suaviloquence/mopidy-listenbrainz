@@ -143,6 +143,10 @@ class Listenbrainz(object):
         )
 
     def list_playlists_created_for_user(self) -> List[PlaylistData]:
+        """List all playlist data from the "created for" endpoint.
+
+        The "created for" endpoint list recommendation playlists; It
+        is defined in ``LIST_PLAYLIST_CREATED_FOR_ENDPOINT``."""
         if self.user_name is None:
             logger.warning("No playlist created for unknown user!")
             return []

@@ -39,7 +39,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             self.playlists_update_timer.cancel()
 
     def import_playlists(self) -> None:
-        logger.info("Import of ListenBrainz playlists")
+        logger.info("Importing ListenBrainz playlists")
 
         import_count = 0
         playlist_datas = self.lb.list_playlists_created_for_user()
@@ -109,7 +109,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             self.playlists.delete(playlist.uri)
 
         logger.info(
-            f"Successfull import of ListenBrainz playlists: {import_count}"
+            f"Successfully imported ListenBrainz playlists: {import_count}"
         )
         self._schedule_playlists_import()
 

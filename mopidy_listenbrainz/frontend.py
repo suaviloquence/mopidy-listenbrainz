@@ -134,19 +134,18 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         return tracks
 
     def _schedule_playlists_import(self):
-        if self.config["listenbrainz"].get("periodic_playlists_update", True):
-            now = datetime.now()
-            days_until_next_monday = 7 - now.weekday()
-            timer_interval = timedelta(
-                days=days_until_next_monday
-            ).total_seconds()
-            logger.debug(
-                f"Playlist update scheduled in {timer_interval} seconds"
-            )
-            self.playlists_update_timer = Timer(
-                timer_interval, self.import_playlists
-            )
-            self.playlists_update_timer.start()
+        now = datetime.now()
+        days_until_next_monday = 7 - now.weekday()
+        timer_interval = timedelta(
+            days=days_until_next_monday
+        ).total_seconds()
+        logger.debug(
+            f"Playlist update scheduled in {timer_interval} seconds"
+        )
+        self.playlists_update_timer = Timer(
+            timer_interval, self.import_playlists
+        )
+        self.playlists_update_timer.start()
 
     def track_playback_started(self, tl_track):
         track = tl_track.track

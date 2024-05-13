@@ -133,9 +133,6 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             query = self.library.search(
                 {"musicbrainz_trackid": [track_mbid]}, uris=search_schemes
             )
-            # search only in local database since other backends can
-            # be quite long to answer, should we offer choice through
-            # config?
             results = query.get()
 
             found_tracks = [t for r in results for t in r.tracks]

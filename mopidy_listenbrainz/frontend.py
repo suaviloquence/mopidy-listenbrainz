@@ -32,9 +32,13 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug("Listenbrainz token valid!")
 
         if self.config["listenbrainz"].get("import_playlists", False):
-            search_schemes = self.config["listenbrainz"].get("search_schemes", [])
+            search_schemes = self.config["listenbrainz"].get(
+                "search_schemes", []
+            )
             if len(search_schemes) > 0:
-                logger.debug(f"Will limit track searches to URIs: {search_schemes}")
+                logger.debug(
+                    f"Will limit track searches to URIs: {search_schemes}"
+                )
             else:
                 logger.debug("Will search tracks among all backends")
 
@@ -144,12 +148,8 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
     def _schedule_playlists_import(self):
         now = datetime.now()
         days_until_next_monday = 7 - now.weekday()
-        timer_interval = timedelta(
-            days=days_until_next_monday
-        ).total_seconds()
-        logger.debug(
-            f"Playlist update scheduled in {timer_interval} seconds"
-        )
+        timer_interval = timedelta(days=days_until_next_monday).total_seconds()
+        logger.debug(f"Playlist update scheduled in {timer_interval} seconds")
         self.playlists_update_timer = Timer(
             timer_interval, self.import_playlists
         )

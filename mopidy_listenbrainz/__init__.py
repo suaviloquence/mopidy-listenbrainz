@@ -20,6 +20,7 @@ class Extension(ext.Extension):
         schema["token"] = config.Secret()
         schema["url"] = config.String()
         schema["import_playlists"] = config.Boolean()
+        schema["search_schemes"] = config.List(optional=True)
         return schema
 
     def setup(self, registry):

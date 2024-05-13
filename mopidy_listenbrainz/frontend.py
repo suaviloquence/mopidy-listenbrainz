@@ -32,6 +32,12 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug("Listenbrainz token valid!")
 
         if self.config["listenbrainz"].get("import_playlists", False):
+            search_schemes = self.config["listenbrainz"].get("search_schemes", [])
+            if len(search_schemes) > 0:
+                logger.debug(f"Will limit track searches to URIs: {search_schemes}")
+            else:
+                logger.debug("Will search tracks among all backends")
+
             self.import_playlists()
 
     def on_stop(self):
@@ -117,9 +123,11 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self, playlist_data: PlaylistData
     ) -> List[Track]:
         tracks: List[Track] = []
+        search_schemes = self.config["listenbrainz"].get("search_schemes", [])
+
         for track_mbid in playlist_data.track_mbids:
             query = self.library.search(
-                {"musicbrainz_trackid": [track_mbid]}, uris=["local:"]
+                {"musicbrainz_trackid": [track_mbid]}, uris=search_schemes
             )
             # search only in local database since other backends can
             # be quite long to answer, should we offer choice through

@@ -11,7 +11,7 @@ try:
 except ModuleNotFoundError:
     UriScheme = NewType("UriScheme", str)
 
-from . import playlists
+from .playlists import ListenbrainzPlaylistsProvider
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
@@ -27,4 +27,4 @@ class ListenbrainzBackend(pykka.ThreadingActor, backend.Backend):
         audio: AudioProxy,  # noqa: ARG002
     ) -> None:
         super().__init__()
-        self.playlists = playlists.ListenbrainzPlaylistsProvider(self)
+        self.playlists = ListenbrainzPlaylistsProvider(self)

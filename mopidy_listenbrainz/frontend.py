@@ -33,14 +33,17 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
         if self.config["listenbrainz"].get("import_playlists", False):
             search_schemes = self.config["listenbrainz"].get(
-                "search_schemes", []
+                "search_schemes", "local:"
             )
             if len(search_schemes) > 0:
                 logger.debug(
                     f"Will limit track searches to URIs: {search_schemes}"
                 )
             else:
-                logger.debug("Will search tracks among all backends")
+                msg = "Track searches among all backends aren't stable! " \
+                    "Better configure `search_schemes' to match your " \
+                    "favorite backend"
+                logger.warn(msg)
 
             self.import_playlists()
 

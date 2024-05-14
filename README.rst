@@ -46,7 +46,7 @@ The following configuration values are available:
 - ``listenbrainz/token``: Your `Listenbrainz user token <https://listenbrainz.org/profile/>`_
 - ``listenbrainz/url``: The URL of the API of the Listenbrainz instance to record listens to (default: api.listenbrainz.org)
 - ``listenbrainz/import_playlists``: Whether to import Listenbrainz playlists (default: ``false``)
-- ``listenbrainz/search_schemes``: If non empty, the search for tracks in Mopidy's library is limited to results with the given schemes. Leave empty (the default) to search among all backends, but note that it may affect performance; It's recommended to customize the value according to your favorite backends (``file:`` for Mopidy-File, ``local:`` for Mopidy-Local, etc.).
+- ``listenbrainz/search_schemes``: If non empty, the search for tracks in Mopidy's library is limited to results with the given schemes. The default value is ``"local:"`` to search tracks in Mopidy-Local library. It's recommended to customize the value according to your favorite backend but beware that not all backends support the required track search by ``musicbrainz_trackid`` (Mopidy-File, Mopidy-InternetArchive, Mopidy-Podcast, Mopidy-Somafm, Mopidy-Stream don't support such searches).
 
 Project resources
 =================

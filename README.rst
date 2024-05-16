@@ -6,13 +6,9 @@ Mopidy-Listenbrainz
     :target: https://pypi.org/project/Mopidy-Listenbrainz/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/github/workflow/status/suaviloquence/mopidy-listenbrainz/CI
+.. image:: https://img.shields.io/github/actions/workflow/status/suaviloquence/mopidy-listenbrainz/ci.yml
     :target: https://github.com/suaviloquence/mopidy-listenbrainz/actions
     :alt: CI build status
-
-.. image:: https://img.shields.io/codecov/c/gh/suaviloquence/mopidy-listenbrainz
-    :target: https://codecov.io/gh/suaviloquence/mopidy-listenbrainz
-    :alt: Test coverage
 
 `Mopidy <https://www.mopidy.com/>`_ extension for 
 `Listenbrainz <https://www.listenbrainz.org/>`_.

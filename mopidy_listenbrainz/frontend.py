@@ -33,7 +33,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
         if self.config["listenbrainz"].get("import_playlists", False):
             search_schemes = self.config["listenbrainz"].get(
-                "search_schemes", "local:"
+                "search_schemes", ["local:"]
             )
             if len(search_schemes) > 0:
                 logger.debug(
@@ -130,7 +130,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self, playlist_data: PlaylistData
     ) -> List[Track]:
         tracks: List[Track] = []
-        search_schemes = self.config["listenbrainz"].get("search_schemes", [])
+        search_schemes = self.config["listenbrainz"].get("search_schemes", ["local:"])
 
         for track_mbid in playlist_data.track_mbids:
             query = self.library.search(

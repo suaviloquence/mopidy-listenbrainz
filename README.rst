@@ -61,4 +61,5 @@ Credits
 
 - Fork of `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`__ by `Stein Magnus Jodal <https://github.com/jodal>`__
 - Current maintainer: `suaviloquence <https://github.com/suaviloquence>`__
+- Playlist support by `Matthias Meulien <https://github.com/orontee>`__
 - `Contributors <https://github.com/suaviloquence/mopidy-listenbrainz/graphs/contributors>`_

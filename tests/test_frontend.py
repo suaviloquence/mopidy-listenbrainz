@@ -2,9 +2,7 @@ from unittest import mock
 
 import pytest
 
-from mopidy import models
 from mopidy_listenbrainz import frontend as frontend_lib
-from mopidy_listenbrainz.listenbrainz import Listenbrainz
 
 
 @pytest.fixture

@@ -141,6 +141,7 @@ class Listenbrainz(object):
                 "Authorization": f"Token {self.token}",
             },
         )
+        assert response.ok
 
     def list_playlists_created_for_user(self) -> List[PlaylistData]:
         """List all playlist data from the "created for" endpoint.
@@ -166,7 +167,7 @@ class Listenbrainz(object):
             playlist_identifier = playlist_dto.get("identifier")
 
             if playlist_identifier is None:
-                logger.debug(f"Skipping playlist without identifier")
+                logger.debug("Skipping playlist without identifier")
                 continue
 
             if playlist_identifier in found_playlists:

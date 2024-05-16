@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import datetime, timedelta
 from threading import Timer
-from typing import List, Optional
+from typing import List
 
 import pykka
 from mopidy.core import CoreListener
@@ -40,9 +40,11 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                     f"Will limit track searches to URIs: {search_schemes}"
                 )
             else:
-                msg = "Track searches among all backends aren't stable! " \
-                    "Better configure `search_schemes' to match your " \
+                msg = (
+                    "Track searches among all backends aren't stable! "
+                    "Better configure `search_schemes' to match your "
                     "favorite backend"
+                )
                 logger.warn(msg)
 
             self.import_playlists()
@@ -130,7 +132,9 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self, playlist_data: PlaylistData
     ) -> List[Track]:
         tracks: List[Track] = []
-        search_schemes = self.config["listenbrainz"].get("search_schemes", ["local:"])
+        search_schemes = self.config["listenbrainz"].get(
+            "search_schemes", ["local:"]
+        )
 
         for track_mbid in playlist_data.track_mbids:
             query = self.library.search(

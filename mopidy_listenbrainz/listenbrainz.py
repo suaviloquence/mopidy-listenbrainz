@@ -63,6 +63,21 @@ def get_requests_session(proxy_config, user_agent):
     return session
 
 
+class _RequestError(Exception):
+    pass
+
+
+def check_response_status(response: requests.Response) -> None:
+    if response.status_code == 200:
+        return
+    elif response.status_code == 429:
+        logger.warning("Too many requests")
+    else:
+        logger.warning(f"Unhandled status code {response.status_code}")
+
+    raise _RequestError
+
+
 class Listenbrainz(object):
     token: str
     url: str
@@ -92,7 +107,9 @@ class Listenbrainz(object):
             },
         )
 
-        if response.status_code != 200:
+        try:
+            check_response_status(response)
+        except _RequestError:
             return False
 
         parsed_response = response.json()
@@ -145,7 +162,10 @@ class Listenbrainz(object):
                 "Authorization": f"Token {self.token}",
             },
         )
-        assert response.ok
+        try:
+            check_response_status(response)
+        except _RequestError:
+            pass
 
     def list_playlists_created_for_user(self) -> List[PlaylistData]:
         """List all playlist data from the "created for" endpoint.
@@ -163,6 +183,11 @@ class Listenbrainz(object):
                 "Authorization": f"Token {self.token}",
             },
         )
+        try:
+            check_response_status(response)
+        except _RequestError:
+            return []
+
         parsed_response = response.json()
         playlists: List[PlaylistData] = []
         found_playlists: List[str] = []
@@ -223,6 +248,11 @@ class Listenbrainz(object):
                 "Authorization": f"Token {self.token}",
             },
         )
+        try:
+            check_response_status(response)
+        except _RequestError:
+            return None
+
         parsed_response = response.json()
         dto = parsed_response.get("playlist", {})
         name = dto.get("title")

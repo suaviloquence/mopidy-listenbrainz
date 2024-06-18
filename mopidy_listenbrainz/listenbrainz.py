@@ -70,6 +70,10 @@ class _RequestError(Exception):
 def check_response_status(response: requests.Response) -> None:
     if response.status_code == 200:
         return
+    elif response.status_code == 400:
+        logger.warning(f"Bad request {response.json()}")
+    elif response.status_code == 401:
+        logger.warning("Unauthorized request")
     elif response.status_code == 429:
         logger.warning("Too many requests")
     else:
@@ -183,10 +187,7 @@ class Listenbrainz(object):
                 "Authorization": f"Token {self.token}",
             },
         )
-        try:
-            check_response_status(response)
-        except _RequestError:
-            return []
+        check_response_status(response)
 
         parsed_response = response.json()
         playlists: List[PlaylistData] = []

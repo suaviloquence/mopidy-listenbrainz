@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import pkg_resources
@@ -232,15 +232,22 @@ class Listenbrainz(object):
             return None
         track_mbids = []
         for track_dto in dto.get("track", []):  # not tracks!
-            track_identifier = track_dto.get("identifier", "")
-            track_mbid = track_identifier_to_mbid(track_identifier)
-            if track_mbid is None:
-                logger.debug(
-                    f"Failed to identify MBID from {track_identifier!r}"
-                )
-                continue
+            track_identifiers: Union[str, list[str]] = track_dto.get(
+                "identifier", []
+            )
+            if isinstance(track_identifiers, str):
+                track_identifiers = [track_identifiers]
 
-            track_mbids.append(track_mbid)
+            for track_identifier in track_identifiers:
+                track_mbid = track_identifier_to_mbid(track_identifier)
+                if track_mbid is None:
+                    logger.debug(
+                        f"Failed to identify MBID from {track_identifier!r}"
+                    )
+                    continue
+                else:
+                    track_mbids.append(track_mbid)
+                    break
 
         if len(track_mbids) == 0:
             logger.debug(

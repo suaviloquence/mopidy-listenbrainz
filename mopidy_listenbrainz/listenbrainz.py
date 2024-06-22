@@ -233,7 +233,7 @@ class Listenbrainz(object):
         track_mbids = []
         for track_dto in dto.get("track", []):  # not tracks!
             track_identifiers: Union[str, list[str]] = track_dto.get(
-                "identifier", []
+                "identifier", {}
             )
             if isinstance(track_identifiers, str):
                 track_identifiers = [track_identifiers]

@@ -107,6 +107,10 @@ class Listenbrainz(object):
         musicbrainz_id: str = "",
         now_playing: bool = False,
     ) -> None:
+        if track == "" or artist == "":
+            logger.debug("Won't submit listen for partially known track")
+            return
+
         listen: Dict[str, Any] = {
             "track_metadata": {
                 "track_name": track,

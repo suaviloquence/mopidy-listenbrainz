@@ -19,4 +19,6 @@ jobs:
       run: python3 -m build
     - uses: pypa/gh-action-pypi-publish@v1.8.14
       with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
         verify-metadata: true

@@ -1,14 +1,21 @@
 import pathlib
 
 import pkg_resources
+import email.parser
 from mopidy import config, ext
 
-__version__ = pkg_resources.get_distribution("Mopidy-Listenbrainz").version
+__dist_name__ = "Mopidy-Listenbrainz"
+_dist = pkg_resources.get_distribution(__dist_name__)
+_pkg_info = _dist.get_metadata('METADATA')
+_metadata = email.parser.Parser().parsestr(_pkg_info)
+
+__version__ = _dist.version
+__author_contact__ = _metadata.get('Author-email')
 
 
 class Extension(ext.Extension):
 
-    dist_name = "Mopidy-Listenbrainz"
+    dist_name = __dist_name__
     ext_name = "listenbrainz"
     version = __version__
 

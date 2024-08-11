@@ -24,6 +24,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self.library = core.library
         self.playlists = core.playlists
         self.playlists_update_timer = None
+        self.last_start_time = None
 
     def on_start(self):
         musicbrainzngs.set_useragent(
@@ -51,7 +52,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                     "Better configure `search_schemes' to match your "
                     "favorite backend"
                 )
-                logger.warn(msg)
+                logger.warning(msg)
 
             self.import_playlists()
 

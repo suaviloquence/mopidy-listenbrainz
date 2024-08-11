@@ -1,5 +1,5 @@
 import logging
-from typing import cast, List, NewType
+from typing import cast, List, NewType, Optional
 
 from mopidy.backend import Backend, PlaylistsProvider
 from mopidy.models import Playlist, Ref
@@ -37,7 +37,7 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
     def as_list(self) -> List[Ref]:
         return [Ref.playlist(uri=p.uri, name=p.name) for p in self.playlists]
 
-    def create(self, name: str) -> Playlist | None:
+    def create(self, name: str) -> Optional[Playlist]:
         uri = name
         if not uri.startswith(self.uri_prefix):
             return None
@@ -58,7 +58,7 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
         del self.playlists[pos]
         return True
 
-    def get_items(self, uri: Uri) -> List[Ref] | None:
+    def get_items(self, uri: Uri) -> Optional[List[Ref]]:
         if not uri.startswith(self.uri_prefix):
             return None
 
@@ -68,7 +68,7 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
 
         return [Ref.playlist(uri=p.uri, name=p.name) for p in found]
 
-    def lookup(self, uri: Uri) -> Playlist | None:
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         if not uri.startswith(self.uri_prefix):
             return None
 
@@ -81,7 +81,7 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
     def refresh(self) -> None:
         pass
 
-    def save(self, playlist: Playlist) -> Playlist | None:
+    def save(self, playlist: Playlist) -> Optional[Playlist]:
         uri = playlist.uri
 
         if not uri.startswith(self.uri_prefix):

@@ -11,9 +11,9 @@ Mopidy-Listenbrainz
     :alt: CI build status
 
 `Mopidy <https://www.mopidy.com/>`_ extension for 
-`Listenbrainz <https://www.listenbrainz.org/>`_.
+`ListenBrainz <https://www.listenbrainz.org/>`_.
 
-This extension requires a free user account at Listenbrainz.
+This extension requires a free user account at ListenBrainz.
 
 
 Installation
@@ -30,7 +30,7 @@ Configuration
 =============
 
 The extension is enabled by default when it is installed. You just need to add
-your `Listenbrainz user token <https://listenbrainz.org/profile/>`_ to your Mopidy configuration file::
+your `ListenBrainz user token <https://listenbrainz.org/profile/>`_ to your Mopidy configuration file::
 
     [listenbrainz]
     token = 240420-249429-29449
@@ -39,9 +39,9 @@ The following configuration values are available:
 
 - ``listenbrainz/enabled``: If the extension should be enabled or not.
   Defaults to enabled.
-- ``listenbrainz/token``: Your `Listenbrainz user token <https://listenbrainz.org/profile/>`_
-- ``listenbrainz/url``: The URL of the API of the Listenbrainz instance to record listens to (default: api.listenbrainz.org)
-- ``listenbrainz/import_playlists``: Whether to import Listenbrainz playlists (default: ``false``)
+- ``listenbrainz/token``: Your `ListenBrainz user token <https://listenbrainz.org/profile/>`_
+- ``listenbrainz/url``: The URL of the API of the ListenBrainz instance to record listens to (default: api.listenbrainz.org)
+- ``listenbrainz/import_playlists``: Whether to import ListenBrainz playlists (default: ``false``)
 - ``listenbrainz/search_schemes``: If non empty, the search for tracks in Mopidy's library is limited to results with the given schemes. The default value is ``"local:"`` to search tracks in Mopidy-Local library. It's recommended to customize the value according to your favorite backend but beware that not all backends support the required track search by ``musicbrainz_trackid`` (Mopidy-File, Mopidy-InternetArchive, Mopidy-Podcast, Mopidy-Somafm, Mopidy-Stream don't support such searches).
 
 Project resources

@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 from threading import Timer
 from typing import List
 
+import musicbrainzngs
 import pykka
 from mopidy.core import CoreListener
 from mopidy.models import Playlist, Track
 
+from . import __dist_name__, __version__, __author_contact__
 from .listenbrainz import Listenbrainz, PlaylistData
 
 logger = logging.getLogger(__name__)
@@ -24,6 +26,10 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self.playlists_update_timer = None
 
     def on_start(self):
+        musicbrainzngs.set_useragent(
+            __dist_name__, __version__, __author_contact__
+        )
+
         self.lb = Listenbrainz(
             self.config["listenbrainz"]["token"],
             self.config["listenbrainz"]["url"],
@@ -132,15 +138,41 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self, playlist_data: PlaylistData
     ) -> List[Track]:
         tracks: List[Track] = []
-        search_schemes = self.config["listenbrainz"].get(
+        search_schemes_mbid = self.config["listenbrainz"].get(
             "search_schemes", ["local:"]
+        )
+        search_schemes_fallback = self.config["listenbrainz"].get(
+            "search_schemes_fallback", ["local:"]
         )
 
         for track_mbid in playlist_data.track_mbids:
+            # try in the library first by MB id
             query = self.library.search(
-                {"musicbrainz_trackid": [track_mbid]}, uris=search_schemes
+                {"musicbrainz_trackid": [track_mbid]}, uris=search_schemes_mbid
             )
             results = query.get()
+
+            found_tracks = [t for r in results for t in r.tracks]
+            if len(found_tracks) == 0:
+                # retrieve track information from MB
+                mb_recording_query = musicbrainzngs.get_recording_by_id(
+                    track_mbid, includes=["artists"]
+                )
+                if mb_recording_query and mb_recording_query["recording"]:
+                    mb_recording = mb_recording_query["recording"]
+
+                    # try again with album artist name and track title
+                    artist_name = mb_recording["artist-credit-phrase"]
+                    track_name = mb_recording["title"]
+                    query = self.library.search(
+                        {
+                            # very few backends support artist+track name queries,
+                            # so we use a keyword search, although it will be less precise
+                            "any": [artist_name, track_name]
+                        },
+                        uris=search_schemes_fallback,
+                    )
+                    results = query.get()
 
             found_tracks = [t for r in results for t in r.tracks]
             if len(found_tracks) == 0:

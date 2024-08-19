@@ -43,7 +43,7 @@ The following configuration values are available:
 - ``listenbrainz/url``: The URL of the API of the ListenBrainz instance to record listens to (default: api.listenbrainz.org)
 - ``listenbrainz/import_playlists``: Whether to import ListenBrainz playlists (default: ``false``)
 - ``listenbrainz/search_schemes``: If non empty, the search for tracks in Mopidy's library is limited to results with the given schemes. The default value is ``"local:"`` to search tracks in Mopidy-Local library. It's recommended to customize the value according to your favorite backend but beware that not all backends support the required track search by ``musicbrainz_trackid`` (Mopidy-File, Mopidy-InternetArchive, Mopidy-Podcast, Mopidy-Somafm, Mopidy-Stream don't support such searches).
-- ``search_schemes_fallback`` - A list of URI prefixes (e.g., ``local:``) to use to search by artist + track name when importing recommendation playlists, as a fallback when a track isn't found in the library by MusicBrainz ID. The default value is ``"local:"``. Make sure that any added URI support searching and won't be rate-limited when importing many tracks at once.
+- ``search_schemes_fallback`` - A list of URI prefixes (e.g., ``local:``) to use to search by artist + track name when importing recommendation playlists, as a fallback when a track isn't found in the library by MusicBrainz ID. The default value is ``"local:"``. Make sure that any added URI supports searching and won't be rate-limited when importing many tracks at once.
 
 Project resources
 =================

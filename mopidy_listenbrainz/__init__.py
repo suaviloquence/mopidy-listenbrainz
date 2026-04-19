@@ -1,12 +1,14 @@
 import pathlib
+from importlib.metadata import distribution
 
-import pkg_resources
 import email.parser
 from mopidy import config, ext
 
 __dist_name__ = "Mopidy-Listenbrainz"
-_dist = pkg_resources.get_distribution(__dist_name__)
-_pkg_info = _dist.get_metadata("METADATA")
+
+
+_dist = distribution(__dist_name__)
+_pkg_info = _dist.read_text("METADATA")
 _metadata = email.parser.Parser().parsestr(_pkg_info)
 
 __version__ = _dist.version

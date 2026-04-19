@@ -2,10 +2,11 @@ import datetime
 import logging
 import time
 from dataclasses import dataclass
+from importlib.metadata import distribution
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
-import pkg_resources
+
 from mopidy import httpclient
 
 import requests
@@ -94,10 +95,10 @@ class Listenbrainz(object):
 
         self.user_name = None  # initialized during token validation
 
-        dist = pkg_resources.get_distribution("Mopidy-Listenbrainz")
+        dist = distribution("Mopidy-Listenbrainz")
         self.session = get_requests_session(
             proxy_config=proxy_config,
-            user_agent=f"{dist.project_name}/{dist.version}",
+            user_agent=f"{dist.name}/{dist.version}",
         )
 
         if not self.validate_token():

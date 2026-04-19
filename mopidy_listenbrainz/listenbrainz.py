@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 from mopidy import httpclient
 
-import requests
+import httpx
 
 from . import __version__
 
@@ -53,22 +53,22 @@ def track_identifier_to_mbid(track_identifier: str) -> Optional[str]:
     )
 
 
-def get_requests_session(proxy_config, user_agent):
-    proxy = httpclient.format_proxy(proxy_config)
+def get_http_client(proxy_config, user_agent):
     full_user_agent = httpclient.format_user_agent(user_agent)
-
-    session = requests.Session()
-    session.proxies.update({"http": proxy, "https": proxy})
-    session.headers.update({"user-agent": full_user_agent})
-
-    return session
+    client = httpx.Client(
+        proxy=httpclient.format_proxy(proxy_config),
+        headers={
+            "user-agent": full_user_agent,
+        }
+    )
+    return client
 
 
 class _RequestError(Exception):
     pass
 
 
-def check_response_status(response: requests.Response) -> None:
+def check_response_status(response: httpx.Response) -> None:
     if response.status_code == 200:
         return
     elif response.status_code == 400:
@@ -96,7 +96,7 @@ class Listenbrainz(object):
         self.user_name = None  # initialized during token validation
 
         dist = distribution("Mopidy-Listenbrainz")
-        self.session = get_requests_session(
+        self.client = get_http_client(
             proxy_config=proxy_config,
             user_agent=f"{dist.name}/{dist.version}",
         )
@@ -105,7 +105,7 @@ class Listenbrainz(object):
             raise RuntimeError(f"Token {token} is not valid")
 
     def validate_token(self) -> bool:
-        response = self.session.get(
+        response = self.client.get(
             url=f"https://{self.url}{VALIDATE_TOKEN_ENDPOINT}",
             headers={
                 "Authorization": f"Token {self.token}",
@@ -156,7 +156,7 @@ class Listenbrainz(object):
 
         payload = [listen]
 
-        response = self.session.post(
+        response = self.client.post(
             # hardcode https?
             url=f"https://{self.url}{SUBMIT_LISTEN_ENDPOINT}",
             json={
@@ -182,7 +182,7 @@ class Listenbrainz(object):
             return []
 
         path = LIST_PLAYLIST_CREATED_FOR_ENDPOINT.format(user=self.user_name)
-        response = self.session.get(
+        response = self.client.get(
             url=f"https://{self.url}{path}",
             headers={
                 "Authorization": f"Token {self.token}",
@@ -244,7 +244,7 @@ class Listenbrainz(object):
             return None
 
         path = PLAYLIST_ENDPOINT.format(playlist_id=playlist_id)
-        response = self.session.get(
+        response = self.client.get(
             url=f"https://{self.url}{path}",
             headers={
                 "Authorization": f"Token {self.token}",

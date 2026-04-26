@@ -59,7 +59,7 @@ def get_http_client(proxy_config, user_agent):
         proxy=httpclient.format_proxy(proxy_config),
         headers={
             "user-agent": full_user_agent,
-        }
+        },
     )
     return client
 

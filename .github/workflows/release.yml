@@ -3,22 +3,25 @@ name: release to pypi
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    - name: "Install dependencies"
-      run: python3 -m pip install build
-    - name: "Build package"
-      run: python3 -m build
-    - uses: pypa/gh-action-pypi-publish@v1.8.14
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
-        verify-metadata: true
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install build tooling
+        run: python3 -m pip install --upgrade build
+      - name: Build package
+        run: python3 -m build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verify-metadata: true

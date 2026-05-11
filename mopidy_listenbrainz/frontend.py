@@ -2,12 +2,13 @@ import logging
 import time
 from datetime import datetime, timedelta
 from threading import Timer
-from typing import List
+from typing import List, Tuple
 
 import musicbrainzngs
 import pykka
 from mopidy.core import CoreListener
 from mopidy.models import Playlist, Track
+from mopidy.types import Uri
 
 from . import __dist_name__, __version__, __author_contact__
 from .listenbrainz import Listenbrainz, PlaylistData
@@ -81,7 +82,9 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
         for playlist_data in playlist_datas:
             source = playlist_data.playlist_id
-            playlist_uri = f"{recommendation_playlist_uri_prefix}:{playlist_data.playlist_id}"
+            playlist_uri = Uri(
+                f"{recommendation_playlist_uri_prefix}:{playlist_data.playlist_id}"
+            )
             tracks = self._collect_playlist_tracks(playlist_data)
 
             if len(tracks) == 0:
@@ -95,7 +98,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                 # must pop since filtered_existing_playlists will
                 # finally be deleted
 
-                logger.debug(f"Already known playlist {playlist_uri}")
+                logger.debug(f"Already known playlist {str(playlist_uri)}")
                 # maybe there're new tracks in Mopidy's database...
             else:
                 query = self.playlists.create(
@@ -137,7 +140,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
     def _collect_playlist_tracks(
         self, playlist_data: PlaylistData
-    ) -> List[Track]:
+    ) -> Tuple[Track, ...]:
         tracks: List[Track] = []
         search_schemes_mbid = self.config["listenbrainz"].get(
             "search_schemes", ["local:"]
@@ -180,7 +183,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
                 continue
 
             tracks.append(found_tracks[0])
-        return tracks
+        return tuple(tracks)
 
     def _schedule_playlists_import(self):
         now = datetime.now()
@@ -194,7 +197,9 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
     def track_playback_started(self, tl_track):
         track = tl_track.track
-        artists = ", ".join(sorted([a.name for a in track.artists]))
+        artists = ", ".join(
+            sorted([a.name for a in track.artists if a.name is not None])
+        )
         self.last_start_time = int(time.time())
         logger.debug(f"Now playing track: {artists} - {track.name}")
 
@@ -212,7 +217,9 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
 
     def track_playback_ended(self, tl_track, time_position):
         track = tl_track.track
-        artists = ", ".join(sorted([a.name for a in track.artists]))
+        artists = ", ".join(
+            sorted([a.name for a in track.artists if a.name is not None])
+        )
         duration = track.length and track.length // 1000 or 0
         time_position = time_position // 1000
         if duration < 30:

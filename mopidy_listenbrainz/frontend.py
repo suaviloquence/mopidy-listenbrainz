@@ -202,7 +202,9 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             track=track.name or "",
             artist=artists,
             release=track.album and track.album.name or "",
-            musicbrainz_id=track.musicbrainz_id or "",
+            musicbrainz_id=track.musicbrainz_id
+            and str(track.musicbrainz_id)
+            or "",
             now_playing=True,
         )
 
@@ -227,5 +229,7 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             track=track.name or "",
             artist=artists,
             release=track.album and track.album.name or "",
-            musicbrainz_id=track.musicbrainz_id or "",
+            musicbrainz_id=track.musicbrainz_id
+            and str(track.musicbrainz_id)
+            or "",
         )

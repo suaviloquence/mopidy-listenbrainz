@@ -8,10 +8,10 @@ __dist_name__ = "Mopidy-Listenbrainz"
 
 
 _dist = distribution(__dist_name__)
-_pkg_info = _dist.read_text("METADATA")
-_metadata = email.parser.Parser().parsestr(_pkg_info)
+_pkg_info = _dist.read_text("METADATA") if _dist is not None else None
+_metadata = email.parser.Parser().parsestr(_pkg_info)  # type: ignore
 
-__version__ = _dist.version
+__version__ = _dist.version  # type: ignore
 __author_contact__ = _metadata.get("Author-email")
 
 

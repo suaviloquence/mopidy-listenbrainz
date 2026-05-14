@@ -1,21 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, NewType
+from typing import TYPE_CHECKING, ClassVar
 
 import pykka
 
 from mopidy import backend
-
-try:
-    from mopidy.types import UriScheme
-except ModuleNotFoundError:
-    UriScheme = NewType("UriScheme", str)
+from mopidy.types import UriScheme
 
 from .playlists import ListenbrainzPlaylistsProvider
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
-    from mopidy.ext import Config
+    from mopidy.config import Config
 
 
 class ListenbrainzBackend(pykka.ThreadingActor, backend.Backend):

@@ -1,15 +1,9 @@
 import logging
-from typing import cast, List, NewType, Optional
+from typing import cast, List, Optional
 
 from mopidy.backend import Backend, PlaylistsProvider
 from mopidy.models import Playlist, Ref
-
-try:
-    from mopidy.types import Uri, UriScheme
-except ModuleNotFoundError:
-    Uri = NewType("Uri", str)
-    UriScheme = NewType("UriScheme", str)
-
+from mopidy.types import Uri, UriScheme
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +32,9 @@ class ListenbrainzPlaylistsProvider(PlaylistsProvider):
         return [Ref.playlist(uri=p.uri, name=p.name) for p in self.playlists]
 
     def create(self, name: str) -> Optional[Playlist]:
-        uri = name
-        if not uri.startswith(self.uri_prefix):
+        if not name.startswith(self.uri_prefix):
             return None
-
+        uri = Uri(name)
         playlist = Playlist(uri=uri, name=name)
         self.playlists.append(playlist)
         return playlist

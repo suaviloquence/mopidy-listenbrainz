@@ -198,11 +198,15 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
         self.last_start_time = int(time.time())
         logger.debug(f"Now playing track: {artists} - {track.name}")
 
+        album_name = (
+            track.album.name if track.album and track.album.name else ""
+        )
+        mbid = str(track.musicbrainz_id) if track.musicbrainz_id else ""
         self.lb.submit_listen(
             track=track.name or "",
             artist=artists,
-            release=track.album and track.album.name or "",
-            musicbrainz_id=track.musicbrainz_id or "",
+            release=album_name,
+            musicbrainz_id=mbid,
             now_playing=True,
         )
 
@@ -223,9 +227,13 @@ class ListenbrainzFrontend(pykka.ThreadingActor, CoreListener):
             self.last_start_time = int(time.time()) - duration
         logger.debug(f"Recording listen of track: {artists} - {track.name}")
 
+        album_name = (
+            track.album.name if track.album and track.album.name else ""
+        )
+        mbid = str(track.musicbrainz_id) if track.musicbrainz_id else ""
         self.lb.submit_listen(
             track=track.name or "",
             artist=artists,
-            release=track.album and track.album.name or "",
-            musicbrainz_id=track.musicbrainz_id or "",
+            release=album_name,
+            musicbrainz_id=mbid,
         )
